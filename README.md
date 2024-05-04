@@ -141,7 +141,7 @@ console.log(response)
 Let's see what running this looks like using `node agent.mjs`
 
 ***Output***
-```json
+```javascript
 {
   toolCall: {
     id: 'call_ze6A8C3mOUBG4zmXO8Z4CPB5',
@@ -156,7 +156,7 @@ Let's see what running this looks like using `node agent.mjs`
   }
 }
 ```
-```json
+```javascript
 {
   response: {
     raw: {
@@ -304,7 +304,7 @@ console.log(response)
 Once again we'll run `node agent.mjs` and see what we get:
 
 ***Output***
-```json
+```javascript
 {
   toolCall: {
     id: 'call_iNo6rTK4pOpOBbO8FanfWLI9',
@@ -323,7 +323,7 @@ Once again we'll run `node agent.mjs` and see what we get:
 }
 ```
 
-```json
+```javascript
 {
   response: {
     raw: {
@@ -408,7 +408,7 @@ console.log(response3)
 
 We'll abbreviate the output, but here are the important things to spot:
 
-```json
+```javascript
 {
   toolCall: {
     id: 'call_ZA1LPx03gO4ABre1r6XowLWq',
@@ -428,7 +428,7 @@ We'll abbreviate the output, but here are the important things to spot:
 
 This is the first tool call, where it used the query engine to get the public health budget.
 
-```json
+```javascript
 {
   toolCall: {
     id: 'call_oHu1KjEvA47ER6HYVfFIq9yp',
@@ -448,7 +448,7 @@ This is the first tool call, where it used the query engine to get the public he
 
 In the second tool call, it got the police budget also from the query engine.
 
-```json
+```javascript
 {
   toolCall: {
     id: 'call_w7OZ1Yy83FVO1jNGn6nnw1GD',
@@ -466,7 +466,7 @@ In the second tool call, it got the police budget also from the query engine.
 
 In the final tool call, it used the `sumNumbers` function to add the two budgets together. Perfect! This leads to the final answer:
 
-```json
+```javascript
 {
     message: {
       content: 'The combined budget of San Francisco for community health and public protection in the fiscal year 2023-24 is $3,250,900,000.',
