@@ -155,6 +155,8 @@ Let's see what running this looks like using `node agent.mjs`
     isError: false
   }
 }
+```
+```json
 {
   response: {
     raw: {
@@ -319,6 +321,9 @@ Once again we'll run `node agent.mjs` and see what we get:
     isError: false
   }
 }
+```
+
+```json
 {
   response: {
     raw: {
