@@ -1,7 +1,7 @@
 import { 
     OpenAI, 
     FunctionTool, 
-    ReActAgent,
+    OpenAIAgent,
     Settings
 } from "llamaindex"
 import 'dotenv/config'
@@ -55,7 +55,7 @@ const tools = [
     )
 ]
 
-const agent = new ReActAgent({tools})
+const agent = new OpenAIAgent({tools})
 
 let response = await agent.chat({
     message: "Add 101 and 303",

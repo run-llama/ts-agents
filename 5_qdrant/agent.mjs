@@ -10,6 +10,9 @@ import {
     QdrantVectorStore
 } from "llamaindex"
 import 'dotenv/config'
+import fs from "node:fs/promises"
+
+const PARSING_CACHE = "./cache.json"
 
 // set LLM and the embedding model
 Settings.llm = new OpenAI({
@@ -42,9 +45,37 @@ const vectorStore = new QdrantVectorStore({
     url: "http://localhost:6333",
 });
 
-// load our data and create a query engine
+// load cache.json and parse it
+let cache = {}
+let cacheExists = false
+try {
+    await fs.access(PARSING_CACHE, fs.constants.F_OK)
+    cacheExists = true
+} catch (e) {
+    console.log("No cache found")
+}
+if (cacheExists) {
+    cache = JSON.parse(await fs.readFile(PARSING_CACHE, "utf-8"))
+}
+
+const filesToParse = [
+    "../data/sf_budget_2023_2024.pdf"
+]
+
+// load our data, reading only files we haven't seen before
+let documents = []
 const reader = new LlamaParseReader({ resultType: "markdown" });
-const documents = await reader.loadData("../data/sf_budget_2023_2024.pdf");
+for (let file of filesToParse) {
+    if (!cache[file]) {
+        documents = documents.concat(await reader.loadData(file))
+        cache[file] = true
+    }
+}
+
+// write the cache back to disk
+await fs.writeFile(PARSING_CACHE, JSON.stringify(cache))
+
+// create a query engine from our documents
 const index = await VectorStoreIndex.fromDocuments(
     documents,
     {vectorStore}
