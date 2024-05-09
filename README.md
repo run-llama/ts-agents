@@ -10,7 +10,13 @@ You'll need to have a recent version of [Node.js](https://nodejs.org/en) install
 npm install llamaindex
 ```
 
-## Get an OpenAI API key
+## Choose your model
+
+By default we'll be using OpenAI with GPT-4, as it's a powerful model and easy to get started with. If you'd prefer to run a local model, [see below](#using-a-local-model-via-ollama).
+
+## A basic agent
+
+### Get an OpenAI API key
 
 If you don't already have one, you can sign up for an [OpenAI API key](https://platform.openai.com/api-keys). You should then put the key in a `.env` file in the root of the project; the file should look like
 
@@ -20,11 +26,11 @@ OPENAI_API_KEY=sk-XXXXXXXXXXXXXXXXXXXXXXXX
 
 We'll use `dotenv` to pull the API key out of that .env file, so also `npm install dotenv`.
 
-## Create `agent.mjs`
+### Create `agent.mjs`
 
 We're going to be using top-level await in our JavaScript, so make sure your file extension is `.mjs` or Node will get confused.
 
-## Load your dependencies
+### Load your dependencies
 
 First we'll need to pull in our dependencies. These are:
 * The OpenAI class to use the OpenAI LLM
@@ -43,7 +49,7 @@ import {
 import 'dotenv/config'
 ```
 
-## Initialize your LLM
+### Initialize your LLM
 
 We need to tell our OpenAI class where its API key is, and which of OpenAI's models to use. We'll be using `gpt-4-turbo`, which is capable while still being pretty cheap. This is a global setting, so anywhere an LLM is needed will use the same model.
 
@@ -54,7 +60,7 @@ Settings.llm = new OpenAI({
 })
 ```
 
-## Turn on logging
+### Turn on logging
 
 We want to see what our agent is up to, so we're going to hook into some events that the library generates and print them out. There are several events possible, but we'll specifically tune in to `llm-tool-call` (when a tool is called) and `llm-tool-result` (when it responds).
 
@@ -67,7 +73,7 @@ Settings.callbackManager.on("llm-tool-result", (event) => {
 })
 ```
 
-## Create a function
+### Create a function
 
 We're going to create a very simple function that adds two numbers together. This will be the tool we ask our agent to use.
 
@@ -79,7 +85,7 @@ const sumNumbers = ({a, b}) => {
 
 Note that we're passing in an object with two named parameters, `a` and `b`. This is a little unusual, but important for defining a tool that an LLM can use.
 
-## Turn the function into a tool for the agent
+### Turn the function into a tool for the agent
 
 This is the most complicated part of creating an agent. We need to define a `FunctionTool`. We have to pass in:
 * The function itself (`sumNumbers`)
@@ -118,7 +124,7 @@ We then wrap up the tools into an array. We could provide lots of tools this way
 const tools = [tool]
 ```
 
-## Create the agent
+### Create the agent
 
 With your LLM already set up and your tools defined, creating an agent is simple:
 
@@ -126,7 +132,7 @@ With your LLM already set up and your tools defined, creating an agent is simple
 const agent = new OpenAIAgent({tools})
 ```
 
-## Ask the agent a question
+### Ask the agent a question
 
 We can use the `chat` interface to ask our agent a question, and it will use the tools we've defined to find an answer.
 
@@ -184,6 +190,93 @@ The second piece of output is the response from the LLM itself, where the `messa
 
 Great! We've built an agent with tool use! You can find this exact code in the folder `1_agent`.
 
+## Using a local model via Ollama
+
+If you're happy using OpenAI, you can skip this section, but many people are interested in using models they run themselves. The easiest way to do this is via the great work of our friends at [Ollama](https://ollama.com/), who provide a simple to use client that will download, install and run a [growing range of models](https://ollama.com/library) for you.
+
+### Install Ollama
+
+They provide a one-click installer for Mac, Linux and Windows on their [home page](https://ollama.com/).
+
+### Pick and run a model
+
+Since we're going to be doing agentic work, we'll need a very capable model, but the largest models are hard to run on a laptop. We think `mixtral 8x7b` is a good balance between power and resources, but `llama3` is another great option. You can run it simply by running
+
+```bash
+ollama run mixtral:8x7b
+```
+
+The first time you run it will also automatically download and install the model for you.
+
+### Switch the LLM in your code
+
+There are two changes you need to make to the code we already wrote in `1_agent` to get Mixtral 8x7b to work. First, you need to switch to that model. Replace the call to `Settings.llm` with this:
+
+```javascript
+Settings.llm = new Ollama({ 
+    model: "mixtral:8x7b", 
+    temperature: 0.1
+});
+```
+
+### Swap to a ReActAgent
+
+In our original code we used a specific OpenAIAgent, so we'll need to switch to a more generic agent pattern, the ReAct pattern. This is simple: change the `const agent` line in your code to read
+
+```javascript
+const agent = new ReActAgent({tools})
+```
+
+(You will also need to bring in `Ollama` and `ReActAgent` in your imports)
+
+### Run your totally local agent
+
+Because your embeddings were already local, your agent can now run entirely locally without making any API calls.
+
+```bash
+node agent.mjs
+```
+
+Note that your model will probably run a lot slower than OpenAI, so be prepared to wait a while!
+
+***Output***
+```javascript
+{
+  response: {
+    message: {
+      role: 'assistant',
+      content: ' Thought: I need to use a tool to add the numbers 101 and 303.\n' +
+        'Action: sumNumbers\n' +
+        'Action Input: {"a": 101, "b": 303}\n' +
+        '\n' +
+        'Observation: 404\n' +
+        '\n' +
+        'Thought: I can answer without using any more tools.\n' +
+        'Answer: The sum of 101 and 303 is 404.'
+    },
+    raw: {
+      model: 'mixtral:8x7b',
+      created_at: '2024-05-09T00:24:30.339473Z',
+      message: [Object],
+      done: true,
+      total_duration: 64678371209,
+      load_duration: 57394551334,
+      prompt_eval_count: 475,
+      prompt_eval_duration: 4163981000,
+      eval_count: 94,
+      eval_duration: 3116692000
+    }
+  },
+  sources: [Getter]
+}
+```
+
+Tada! You can see all of this in the folder `1a_mixtral`.
+
+### Extending to other examples
+
+You can use a ReActAgent instead of an OpenAIAgent in any of the further examples below, but keep in mind that GPT-4 is a lot more capable than Mixtral 8x7b, so you may see more errors or failures in reasoning if you are using an entirely local setup.
+
 ## Adding Retrieval-Augmented Generation (RAG)
 
 While an agent that can perform math is nifty (LLMs are usually not very good at math), LLM-based applications are always more interesting when they work with large amounts of data. In this case, we're going to use a 200-page PDF of the proposed budget of the city of San Francisco for fiscal years 2024-2024 and 2024-2025. It's a great example because it's extremely wordy and full of tables of figures, which present a challenge for humans and LLMs alike.
@@ -197,7 +290,7 @@ To learn more about RAG, we recommend this [introduction](https://docs.llamainde
 
 We're going to start with the same agent we just finished building, but make a few changes. You can find the finished version in the folder `2_agentic_rag`.
 
-## New dependencies
+### New dependencies
 
 We'll be bringing in `SimpleDirectoryReader`, `HuggingFaceEmbedding`, `VectorStoreIndex`, and `QueryEngineTool` from LlamaIndex.TS, as well as the dependencies we previously used.
 
@@ -214,7 +307,7 @@ import {
 } from "llamaindex"
 ```
 
-## Add an embedding model
+### Add an embedding model
 
 To encode our text into embeddings, we'll need an embedding model. We could use OpenAI for this but to save on API calls we're going to use a local embedding model from HuggingFace.
 
@@ -225,7 +318,7 @@ Settings.embedModel = new HuggingFaceEmbedding({
 })
 ```
 
-## Load data using SimpleDirectoryReader
+### Load data using SimpleDirectoryReader
 
 SimpleDirectoryReader is a flexible tool that can read a variety of file formats. We're going to point it at our data directory, which contains just the single PDF file, and get it to return a set of documents.
 
@@ -234,7 +327,7 @@ const reader = new SimpleDirectoryReader()
 const documents = await reader.loadData("../data")
 ```
 
-## Index our data
+### Index our data
 
 Now we turn our text into embeddings. The `VectorStoreIndex` class takes care of this for us when we use the `fromDocuments` method (it uses the embedding model we defined in `Settings` earlier).
 
@@ -242,7 +335,7 @@ Now we turn our text into embeddings. The `VectorStoreIndex` class takes care of
 const index = await VectorStoreIndex.fromDocuments(documents)
 ```
 
-## Configure a retriever
+### Configure a retriever
 
 Before LlamaIndex can send a query to the LLM, it needs to find the most relevant chunks to send. That's the purpose of a `Retriever`. We're going to get `VectorStoreIndex` to act as a retriever for us
 
@@ -250,7 +343,7 @@ Before LlamaIndex can send a query to the LLM, it needs to find the most relevan
 const retriever = await index.asRetriever()
 ```
 
-## Configure how many documents to retrieve
+### Configure how many documents to retrieve
 
 By default LlamaIndex will retrieve just the 2 most relevant chunks of text. This document is complex though, so we'll ask for more context.
 
@@ -258,7 +351,7 @@ By default LlamaIndex will retrieve just the 2 most relevant chunks of text. Thi
 retriever.similarityTopK = 10
 ```
 
-## Create a QueryEngineTool
+### Create a QueryEngineTool
 
 And our final step in creating a RAG pipeline is to create a query engine that will use the retriever to find the most relevant chunks of text, and then use the LLM to answer the question.
 
@@ -268,7 +361,7 @@ const queryEngine = await index.asQueryEngine({
 })
 ```
 
-## Define the query engine as a tool
+### Define the query engine as a tool
 
 Just as before we created a `FunctionTool`, we're going to create a `QueryEngineTool` that uses our `queryEngine`.
 
@@ -286,7 +379,7 @@ const tools = [
 
 As before, we've created an array of tools with just one tool in it. The metadata is slightly different: we don't need to define our parameters, we just give the tool a name and a natural-language description.
 
-## Create the agent as before
+### Create the agent as before
 
 Creating the agent and asking a question is exactly the same as before, but we'll ask a different question.
 
@@ -349,7 +442,7 @@ Once again we see a `toolResult`. You can see the query the LLM decided to send 
 
 So now we have an agent that can index complicated documents and answer questions about them. Let's combine these two agents!
 
-### A RAG agent that does math
+## A RAG agent that does math
 
 In `3_rag_and_tools` you'll find our third iteration of the agent. We've combined the two previous agents, so we've defined both `sumNumbers` and a `QueryEngineTool` and created an array of two tools:
 
