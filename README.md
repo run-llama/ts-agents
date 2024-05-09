@@ -590,7 +590,7 @@ Now you will be able to ask more complicated questions of the same PDF and get b
 
 In the previous examples, we've been loading our data into memory each time we run the agent. This is fine for small datasets, but for larger datasets you'll want to store your embeddings in a database. LlamaIndex.TS provides a `VectorStore` class that can store your embeddings in a variety of databases. We're going to use [Qdrant](https://qdrant.tech/), a popular vector store, for this example.
 
-We can get a local instance of Qdrant running very simply with Docker:
+We can get a local instance of Qdrant running very simply with Docker (make sure you [install Docker](https://www.docker.com/products/docker-desktop/) first):
 
 ```bash
 docker pull qdrant/qdrant
