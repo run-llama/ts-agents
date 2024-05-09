@@ -656,6 +656,8 @@ Since parsing a PDF can be slow, especially a large one, using the pre-parsed ch
 
 In this repo you've learned how to
 * Create an agent
+* Use remote LLMs like GPT-4
+* Use local LLMs like Mixtral
 * Create a RAG query engine
 * Turn functions and query engines into agent tools
 * Combine those tools
