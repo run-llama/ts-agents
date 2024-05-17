@@ -1,17 +1,17 @@
 import { 
-    OpenAI, 
+    Ollama, 
     FunctionTool, 
-    OpenAIAgent,
+    ReActAgent,
     Settings
 } from "llamaindex"
 import 'dotenv/config'
 
 async function main() {
 
-    Settings.llm = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-        model: "gpt-4o",
-    })
+    Settings.llm = new Ollama({ 
+        model: "mixtral:8x7b"
+    });
+
     /*
     Set up logging so we can see the work in progress.
     Available events:
@@ -57,14 +57,13 @@ async function main() {
         )
     ]
 
-    const agent = new OpenAIAgent({tools})
+    const agent = new ReActAgent({tools})
 
     let response = await agent.chat({
         message: "Add 101 and 303",
     })
 
     console.log(response)
-
 }
 
 main().catch(console.error);

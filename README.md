@@ -32,9 +32,25 @@ OPENAI_API_KEY=sk-XXXXXXXXXXXXXXXXXXXXXXXX
 
 We'll use `dotenv` to pull the API key out of that .env file, so also `npm install dotenv`.
 
-### Create `agent.mjs`
+### Create `agent.ts`
 
-We're going to be using top-level await in our JavaScript, so make sure your file extension is `.mjs` or Node will get confused.
+We want to use `await` so we're going to wrap all of our code in a `main` function, like this:
+
+```typescript
+// Your imports go here
+
+async function main() {
+  // the rest of your code goes here
+}
+
+main().catch(console.error);
+```
+
+For the rest of this guide we'll assume your code is wrapped like this so we can use `await`. You can run the code this way:
+
+```bash
+npx tsx example.ts
+```
 
 ### Load your dependencies
 
@@ -357,7 +373,7 @@ By default LlamaIndex will retrieve just the 2 most relevant chunks of text. Thi
 retriever.similarityTopK = 10
 ```
 
-### Create a QueryEngineTool
+### Create a query engine
 
 And our final step in creating a RAG pipeline is to create a query engine that will use the retriever to find the most relevant chunks of text, and then use the LLM to answer the question.
 
