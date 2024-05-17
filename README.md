@@ -556,7 +556,7 @@ This is the first tool call, where it used the query engine to get the public he
       metadata: [Object]
     },
     input: { query: 'public protection budget 2023-2024' },
-    output: "The Public Defender's Office, which is a key component of the public protection sector, has a proposed budget for Fiscal Year 2023-24 of $50.9 million."
+    output: "The budget for Public Protection in San Francisco for Fiscal Year (FY) 2023-24 is $2,012.5 million."
   }
 }
 ```
@@ -566,14 +566,14 @@ In the second tool call, it got the police budget also from the query engine.
 ```javascript
 {
   toolCall: {
-    id: 'call_w7OZ1Yy83FVO1jNGn6nnw1GD',
+    id: 'call_SzG4yGUnLbv1T7IyaLAOqg3t',
     name: 'sumNumbers',
-    input: { a: 3200000000, b: 50900000 }
+    input: { a: 3200, b: 2012.5 }
   },
   toolResult: {
     tool: FunctionTool { _fn: [Function: sumNumbers], _metadata: [Object] },
-    input: { a: 3200000000, b: 50900000 },
-    output: '3250900000',
+    input: { a: 3200, b: 2012.5 },
+    output: '5212.5',
     isError: false
   }
 }
@@ -584,7 +584,7 @@ In the final tool call, it used the `sumNumbers` function to add the two budgets
 ```javascript
 {
     message: {
-      content: 'The combined budget of San Francisco for community health and public protection in the fiscal year 2023-24 is $3,250,900,000.',
+      content: 'The combined budget of San Francisco for community health and public protection in Fiscal Year (FY) 2023-24 is $5,212.5 million.',
       role: 'assistant',
       options: {}
     }
